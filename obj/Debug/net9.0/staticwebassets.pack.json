@@ -9,6 +9,10 @@
       "PackagePath": "staticwebassets/index.html"
     },
     {
+      "Id": "/home/johnhall72/Documents/Github/BlazorBlogging/wwwroot/js/editor.js",
+      "PackagePath": "staticwebassets/js/editor.js"
+    },
+    {
       "Id": "obj/Debug/net9.0/staticwebassets/msbuild.BlazorBlogging.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
     },

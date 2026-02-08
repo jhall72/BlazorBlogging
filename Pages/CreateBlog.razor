@@ -3,97 +3,123 @@
 @using BlazorBlogging.Data
 @using BlazorBlogging.Service
 @inject BlogService BlogService
+@inject AiSuggestionService AiService
 
-<h1>@(isEditing ? "Edit Blog Post" : "Create Blog Post")</h1>
-
-<div class="form-group">
-    <label>Title</label>
-    <input type="text" @bind="post.Title" />
-</div>
-
-<div class="form-group">
-    <label>Description</label>
-    <input type="text" @bind="post.Description" />
-</div>
-
-<div class="form-group">
-    <label>Content</label>
-    <textarea rows="12" @bind="post.Content"></textarea>
-</div>
-
-<div class="form-group">
-    <label>Tags (comma separated)</label>
-    <input type="text" @bind="tagsInput" />
-</div>
-
-<div class="form-group">
-    <label>
-        <input type="checkbox" @bind="post.Published" />
-        Published
-    </label>
-</div>
-
-<div class="form-actions">
-    <button class="btn" @onclick="SavePost">@(isEditing ? "Update" : "Create")</button>
-    <a class="btn btn-secondary" href="/blogs">Cancel</a>
-</div>
-
-@if (!string.IsNullOrEmpty(message))
-{
-    <p class="form-message">@message</p>
-}
-
-@if (isEditing)
-{
-    <hr />
-    <h2>Versions</h2>
-
-    <div class="version-create">
-        <div class="form-group">
-            <label>Change Description</label>
-            <input type="text" @bind="newVersionDescription" />
+<div class="edit-page">
+    <div class="sticky-top-bar">
+        <h1>@(isEditing ? "Edit Post" : "Create Post")</h1>
+        <div class="bar-actions">
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <span class="bar-message">@message</span>
+            }
+            <label class="toggle-label">
+                <input type="checkbox" @bind="post.Published" />
+                Published
+            </label>
+            <button class="btn" @onclick="SavePost">@(isEditing ? "Update" : "Create")</button>
+            <a class="btn btn-secondary" href="/">Cancel</a>
         </div>
-        <button class="btn" @onclick="CreateVersion">Save New Version</button>
     </div>
 
-    @if (versions is not null && versions.Any())
-    {
-        <div class="version-list">
-            @foreach (var version in versions)
-            {
-                <div class="version-card @(version.Id == post.LatestVersionId ? "version-latest" : "")">
-                    <div class="version-header">
-                        <strong>Version @version.VersionNumber</strong>
-                        @if (version.Id == post.LatestVersionId)
-                        {
-                            <span class="badge published">Latest</span>
-                        }
-                        <span class="version-date">@version.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
-                    </div>
-                    @if (!string.IsNullOrEmpty(version.ChangeDescription))
+    <div class="edit-page-body">
+        <div class="edit-meta">
+            <div class="edit-meta-field edit-meta-title">
+                <label>Title</label>
+                <input type="text" @bind="post.Title" placeholder="Post title..." />
+            </div>
+            <div class="edit-meta-field edit-meta-desc">
+                <label>Description</label>
+                <div class="input-with-btn">
+                    <input type="text" @bind="post.Description" placeholder="Brief description..." />
+                    <button type="button" class="btn btn-suggest btn-sm" @onclick="SuggestDescription" disabled="@suggestingDescription">
+                        @(suggestingDescription ? "..." : "Suggest")
+                    </button>
+                </div>
+            </div>
+            <div class="edit-meta-field edit-meta-tags">
+                <label>Tags</label>
+                <div class="input-with-btn">
+                    <input type="text" @bind="tagsInput" placeholder="Comma separated..." />
+                    <button type="button" class="btn btn-suggest btn-sm" @onclick="SuggestTags" disabled="@suggestingTags">
+                        @(suggestingTags ? "..." : "Suggest")
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="edit-content">
+            <RichEditor @bind-Content="content" />
+        </div>
+
+        @if (showVersions)
+        {
+            <div class="edit-versions-bar">
+                <button type="button" class="version-toggle-btn" @onclick="ToggleVersionPanel">
+                    <span class="toggle-chevron @(versionPanelOpen ? "open" : "")">&#9654;</span>
+                    Version History
+                    @if (versions is not null)
                     {
-                        <p>@version.ChangeDescription</p>
+                        <span>(@versions.Count)</span>
                     }
-                    <div class="version-actions">
-                        <button class="btn btn-secondary" @onclick="() => RestoreVersion(version)">Restore</button>
+                </button>
+            </div>
+
+            @if (versionPanelOpen)
+            {
+                <div class="version-section">
+                    <div class="version-create">
+                        <div class="version-create-row">
+                            <input type="text" @bind="newVersionDescription" placeholder="Change description..." />
+                            <button class="btn btn-sm" @onclick="CreateVersion">Save Version</button>
+                        </div>
                     </div>
+
+                    @if (versions is not null && versions.Any())
+                    {
+                        <div class="version-list">
+                            @foreach (var version in versions)
+                            {
+                                <div class="version-card @(version.Id == post.LatestVersionId ? "version-latest" : "")">
+                                    <div class="version-header">
+                                        <strong>v@version.VersionNumber</strong>
+                                        @if (version.Id == post.LatestVersionId)
+                                        {
+                                            <span class="badge published">Latest</span>
+                                        }
+                                        <span class="version-date">@version.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                        @if (!string.IsNullOrEmpty(version.ChangeDescription))
+                                        {
+                                            <span class="version-desc">&mdash; @version.ChangeDescription</span>
+                                        }
+                                    </div>
+                                    <div class="version-actions">
+                                        <button class="btn btn-sm btn-outline" @onclick="() => RestoreVersion(version)">Restore</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="version-empty">No versions yet.</p>
+                    }
                 </div>
             }
-        </div>
-    }
-    else
-    {
-        <p>No versions yet.</p>
-    }
-}
+        }
+    </div>
+</div>
 
 @code {
     [Parameter] public string? Id { get; set; }
 
     private BlogPost post = new();
+    private string content = "";
     private string tagsInput = "";
     private string message = "";
     private bool isEditing;
+    private bool showVersions;
+    private bool versionPanelOpen;
     private List<PostVersion>? versions;
     private string newVersionDescription = "";
 
@@ -107,9 +133,22 @@
                 post = existing;
                 tagsInput = string.Join(", ", post.Tags);
                 isEditing = true;
+                showVersions = true;
                 await LoadVersions();
+
+                if (!string.IsNullOrEmpty(post.LatestVersionId))
+                {
+                    var latest = await BlogService.GetVersionByIdAsync(post.LatestVersionId);
+                    if (latest is not null)
+                        content = latest.Content;
+                }
             }
         }
+    }
+
+    private void ToggleVersionPanel()
+    {
+        versionPanelOpen = !versionPanelOpen;
     }
 
     private async Task SavePost()
@@ -121,6 +160,7 @@
         if (isEditing)
         {
             await BlogService.UpdatePostAsync(post);
+            await AutoSaveVersion();
             message = "Post updated.";
         }
         else
@@ -128,6 +168,17 @@
             await BlogService.CreatePostAsync(post);
             isEditing = true;
             Id = post.Id;
+
+            var version = new PostVersion
+            {
+                BlogPostId = post.Id,
+                Content = content,
+                VersionNumber = 1.0,
+                ChangeDescription = "Initial version"
+            };
+            await BlogService.CreateVersionAsync(version);
+            await LoadVersions();
+
             message = "Post created.";
         }
     }
@@ -153,7 +204,7 @@
         var version = new PostVersion
         {
             BlogPostId = post.Id,
-            Content = post.Content,
+            Content = content,
             VersionNumber = nextVersion,
             ChangeDescription = newVersionDescription
         };
@@ -164,10 +215,86 @@
         await LoadVersions();
     }
 
+    private async Task AutoSaveVersion()
+    {
+        if (string.IsNullOrEmpty(post.Id)) return;
+
+        await LoadVersions();
+
+        double nextVersion = 1.0;
+        if (versions is not null && versions.Any())
+        {
+            nextVersion = versions.Max(v => v.VersionNumber) + 1.0;
+        }
+
+        var version = new PostVersion
+        {
+            BlogPostId = post.Id,
+            Content = content,
+            VersionNumber = nextVersion,
+            ChangeDescription = "Auto-saved on update"
+        };
+
+        await BlogService.CreateVersionAsync(version);
+        await LoadVersions();
+    }
+
     private async Task RestoreVersion(PostVersion version)
     {
-        post.Content = version.Content;
-        await BlogService.UpdatePostAsync(post);
-        message = $"Restored to version {version.VersionNumber}.";
+        content = version.Content;
+        message = $"Restored to v{version.VersionNumber}.";
+    }
+
+    private bool suggestingDescription;
+    private bool suggestingTags;
+
+    private async Task SuggestDescription()
+    {
+        if (string.IsNullOrWhiteSpace(post.Title) && string.IsNullOrWhiteSpace(content))
+        {
+            message = "Add a title or content first so a description can be suggested.";
+            return;
+        }
+
+        suggestingDescription = true;
+        StateHasChanged();
+
+        try
+        {
+            post.Description = await AiService.SuggestDescriptionAsync(post.Title, content);
+        }
+        catch (Exception ex)
+        {
+            message = $"Description suggestion failed: {ex.Message}";
+        }
+        finally
+        {
+            suggestingDescription = false;
+        }
+    }
+
+    private async Task SuggestTags()
+    {
+        if (string.IsNullOrWhiteSpace(post.Title) && string.IsNullOrWhiteSpace(content))
+        {
+            message = "Add a title or content first so tags can be suggested.";
+            return;
+        }
+
+        suggestingTags = true;
+        StateHasChanged();
+
+        try
+        {
+            tagsInput = await AiService.SuggestTagsAsync(post.Title, post.Description, content);
+        }
+        catch (Exception ex)
+        {
+            message = $"Tag suggestion failed: {ex.Message}";
+        }
+        finally
+        {
+            suggestingTags = false;
+        }
     }
 }

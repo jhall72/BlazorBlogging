@@ -1,0 +1,335 @@
+/* ============================================================
+   Blog List Styles (BlazorBlogging.Shared)
+   Used by the editor app AND the public website to render
+   the blog post card grid.
+   ============================================================ */
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+}
+
+/* ── Base card ── */
+
+.blog-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.blog-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-color: #c7d2fe;
+    transform: translateY(-2px);
+}
+
+/* ── Viewer mode card ── */
+
+.blog-card-view {
+    cursor: pointer;
+    padding: 1.5rem;
+    gap: 0.3rem;
+}
+
+.blog-card-view .card-date {
+    font-size: 0.73rem;
+    color: #9ca3af;
+    letter-spacing: 0.02em;
+}
+
+.blog-card-view .card-title {
+    margin: 0.35rem 0 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #111827;
+    line-height: 1.4;
+}
+
+.blog-card-view .card-desc {
+    margin: 0.35rem 0 0;
+    font-size: 0.88rem;
+    color: #6b7280;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.blog-card-view .card-read-more {
+    margin-top: auto;
+    padding-top: 1rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #4a4aef;
+    transition: color 0.15s, letter-spacing 0.15s;
+}
+
+.blog-card-view:hover .card-read-more {
+    color: #3730a3;
+    letter-spacing: 0.02em;
+}
+
+/* ── Editor mode parts ── */
+
+.card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+}
+
+.card-date {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.card-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e1e2f;
+    line-height: 1.35;
+}
+
+.card-desc {
+    margin: 0 0 0.75rem;
+    font-size: 0.88rem;
+    color: #6b7280;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.85rem;
+}
+
+.tag-pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    background: #eef2ff;
+    color: #4338ca;
+    border-radius: 10px;
+}
+
+.card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.card-updated {
+    font-size: 0.72rem;
+    color: #9ca3af;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.35rem;
+}
+
+/* ── Badges ── */
+
+.badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.badge-published {
+    background-color: #22c55e;
+}
+
+.badge-draft {
+    background-color: #94a3b8;
+}
+
+/* ── Buttons (minimal set so the component works standalone) ── */
+
+.blog-grid .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+    background-color: #4a4aef;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.15s;
+    white-space: nowrap;
+}
+
+.blog-grid .btn:hover {
+    background-color: #3a3adf;
+}
+
+.blog-grid .btn-sm {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+}
+
+.blog-grid .btn-secondary {
+    background-color: #6c757d;
+}
+
+.blog-grid .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.blog-grid .btn-outline {
+    background: transparent;
+    color: #4a4aef;
+    border: 1px solid #4a4aef;
+}
+
+.blog-grid .btn-outline:hover {
+    background: #4a4aef;
+    color: #fff;
+}
+
+/* ── Empty / loading states ── */
+
+.blog-list-loading {
+    color: #9ca3af;
+    text-align: center;
+    padding: 2rem;
+}
+
+.blog-list-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6b7280;
+}
+
+/* ============================================================
+   Blog Post Detail View
+   ============================================================ */
+
+.post-detail {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+.post-detail-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    height: 48px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.post-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    white-space: nowrap;
+}
+
+.post-back-btn:hover {
+    color: #4a4aef;
+    border-color: #c7d2fe;
+    background: #f5f3ff;
+}
+
+.post-bar-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #9ca3af;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.post-detail-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.post-detail-inner {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.post-detail-header {
+    margin-bottom: 2rem;
+}
+
+.post-detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+    color: #9ca3af;
+    margin-bottom: 0.6rem;
+}
+
+.post-meta-sep {
+    color: #d1d5db;
+}
+
+.post-detail-title {
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+}
+
+.post-detail-desc {
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+    color: #6b7280;
+    line-height: 1.55;
+}
+
+.post-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.post-detail-body {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.5rem;
+}

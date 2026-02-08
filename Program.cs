@@ -31,6 +31,9 @@ public class Program
 
         builder.Services.AddScoped<BlogService>();
 
+        var anthropicKey = configuration["Anthropic:ApiKey"] ?? "";
+        builder.Services.AddSingleton(new AiSuggestionService(anthropicKey));
+
         builder.RootComponents.Add<App>("app");
 
         var app = builder.Build();

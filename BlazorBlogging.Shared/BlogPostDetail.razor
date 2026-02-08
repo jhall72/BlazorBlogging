@@ -1,0 +1,40 @@
+@using BlazorBlogging.Shared.Models
+
+<div class="post-detail">
+    <div class="post-detail-bar">
+        <button class="post-back-btn" @onclick="OnBack">
+            &larr; Back to posts
+        </button>
+        <span class="post-bar-title">@Post.Title</span>
+    </div>
+    <div class="post-detail-scroll">
+        <div class="post-detail-inner">
+            <div class="post-detail-header">
+                <div class="post-detail-meta">
+                    <span>@Post.CreatedAt.ToString("MMMM dd, yyyy")</span>
+                    @if (Post.Tags.Any())
+                    {
+                        <span class="post-meta-sep">&middot;</span>
+                        <span>@ReadTime min read</span>
+                    }
+                </div>
+                <h1 class="post-detail-title">@Post.Title</h1>
+                @if (!string.IsNullOrEmpty(Post.Description))
+                {
+                    <p class="post-detail-desc">@Post.Description</p>
+                }
+            </div>
+            <div class="post-detail-body">
+                <BlogContentView Content="@Content" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public BlogPostSummary Post { get; set; } = default!;
+    [Parameter] public string Content { get; set; } = "";
+    [Parameter] public EventCallback OnBack { get; set; }
+
+    private int ReadTime => Math.Max(1, (Content?.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length ?? 0) / 200);
+}

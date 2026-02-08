@@ -1,0 +1,105 @@
+@using BlazorBlogging.Shared.Models
+
+@if (Posts is null)
+{
+    <p class="blog-list-loading">Loading...</p>
+}
+else if (!Posts.Any())
+{
+    <div class="blog-list-empty">
+        <p>@(EditorMode ? "No blog posts yet." : "No posts to show.")</p>
+    </div>
+}
+else
+{
+    <div class="blog-grid">
+        @foreach (var post in Posts)
+        {
+            @if (EditorMode)
+            {
+                <div class="blog-card">
+                    <div class="card-top">
+                        @if (post.Published)
+                        {
+                            <span class="badge badge-published">Published</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-draft">Draft</span>
+                        }
+                        <span class="card-date">@post.CreatedAt.ToString("MMM dd, yyyy")</span>
+                    </div>
+
+                    <h2 class="card-title">@post.Title</h2>
+
+                    @if (!string.IsNullOrEmpty(post.Description))
+                    {
+                        <p class="card-desc">@post.Description</p>
+                    }
+
+                    @if (post.Tags.Any())
+                    {
+                        <div class="card-tags">
+                            @foreach (var tag in post.Tags)
+                            {
+                                <span class="tag-pill">@tag</span>
+                            }
+                        </div>
+                    }
+
+                    <div class="card-bottom">
+                        @if (post.UpdatedAt.HasValue)
+                        {
+                            <span class="card-updated">Updated @post.UpdatedAt.Value.ToString("MMM dd")</span>
+                        }
+                        else
+                        {
+                            <span></span>
+                        }
+                        <div class="card-actions">
+                            <button class="btn btn-sm" @onclick="() => OnEdit.InvokeAsync(post.Id)">Edit</button>
+                            @if (post.Published)
+                            {
+                                <button class="btn btn-sm btn-secondary" @onclick="() => OnUnpublish.InvokeAsync(post.Id)">Unpublish</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-outline" @onclick="() => OnPublish.InvokeAsync(post.Id)">Publish</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="blog-card blog-card-view" @onclick="() => HandleCardClick(post)">
+                    <span class="card-date">@post.CreatedAt.ToString("MMM dd, yyyy")</span>
+                    <h2 class="card-title">@post.Title</h2>
+                    @if (!string.IsNullOrEmpty(post.Description))
+                    {
+                        <p class="card-desc">@post.Description</p>
+                    }
+                    <span class="card-read-more">Read more &rarr;</span>
+                </div>
+            }
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public List<BlogPostSummary>? Posts { get; set; }
+    [Parameter] public bool EditorMode { get; set; }
+
+    [Parameter] public EventCallback<string> OnEdit { get; set; }
+    [Parameter] public EventCallback<string> OnPublish { get; set; }
+    [Parameter] public EventCallback<string> OnUnpublish { get; set; }
+    [Parameter] public EventCallback<string> OnView { get; set; }
+
+    private async Task HandleCardClick(BlogPostSummary post)
+    {
+        if (!EditorMode && OnView.HasDelegate)
+        {
+            await OnView.InvokeAsync(post.Id);
+        }
+    }
+}

@@ -1,68 +1,46 @@
 @page "/blogs"
+@page "/"
 @using BlazorBlogging.Data
 @using BlazorBlogging.Service
+@using BlazorBlogging.Shared
+@using BlazorBlogging.Shared.Models
 @inject BlogService BlogService
+@inject NavigationManager Nav
 
-<h1>Blog Posts</h1>
-
-@if (posts is null)
+@if (selectedPost is not null)
 {
-    <p>Loading...</p>
-}
-else if (!posts.Any())
-{
-    <p>No blog posts yet. <a href="/blogs/create">Create one!</a></p>
+    <BlogPostDetail Post="@selectedPost"
+                    Content="@selectedContent"
+                    OnBack="ClosePost" />
 }
 else
 {
-    <div class="blog-list">
-        @foreach (var post in posts)
-        {
-            <div class="blog-card">
-                <div class="blog-card-header">
-                    <h2>@post.Title</h2>
-                    @if (post.Published)
-                    {
-                        <span class="badge published">Published</span>
-                    }
-                    else
-                    {
-                        <span class="badge draft">Draft</span>
-                    }
-                </div>
-                @if (!string.IsNullOrEmpty(post.Description))
-                {
-                    <p class="blog-description">@post.Description</p>
-                }
-                <div class="blog-meta">
-                    <span>Created: @post.CreatedAt.ToString("MMM dd, yyyy")</span>
-                    @if (post.UpdatedAt.HasValue)
-                    {
-                        <span>Updated: @post.UpdatedAt.Value.ToString("MMM dd, yyyy")</span>
-                    }
-                    @if (post.Tags.Any())
-                    {
-                        <span>Tags: @string.Join(", ", post.Tags)</span>
-                    }
-                </div>
-                <div class="blog-actions">
-                    <a class="btn" href="/blogs/edit/@post.Id">Edit</a>
-                    @if (post.Published)
-                    {
-                        <button class="btn btn-secondary" @onclick="() => UnpublishPost(post)">Unpublish</button>
-                    }
-                    else
-                    {
-                        <button class="btn" @onclick="() => PublishPost(post)">Publish</button>
-                    }
-                </div>
-            </div>
-        }
+    <div class="page-header">
+        <div>
+            <h1>Blog Posts</h1>
+            @if (posts is not null)
+            {
+                var publishedCount = posts.Count(p => p.Published);
+                var draftCount = posts.Count - publishedCount;
+                <p class="page-header-summary">@posts.Count post@(posts.Count != 1 ? "s" : ""), @publishedCount published, @draftCount draft@(draftCount != 1 ? "s" : "")</p>
+            }
+        </div>
+        <a class="btn" href="/blogs/create">+ New Post</a>
     </div>
+
+    <BlogListView Posts="@summaries"
+                  EditorMode="false"
+                  OnEdit="HandleEdit"
+                  OnPublish="HandlePublish"
+                  OnUnpublish="HandleUnpublish"
+                  OnView="HandleView" />
 }
 
 @code {
     private List<BlogPost>? posts;
+    private List<BlogPostSummary>? summaries;
+    private BlogPostSummary? selectedPost;
+    private string selectedContent = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,18 +50,59 @@ else
     private async Task LoadPosts()
     {
         posts = await BlogService.GetAllPostsAsync();
+        summaries = posts?.Select(p => new BlogPostSummary
+        {
+            Id = p.Id,
+            Title = p.Title,
+            Description = p.Description,
+            CreatedAt = p.CreatedAt,
+            UpdatedAt = p.UpdatedAt,
+            Published = p.Published,
+            Tags = p.Tags
+        }).ToList();
     }
 
-    private async Task UnpublishPost(BlogPost post)
+    private async Task HandleView(string id)
     {
-        post.Published = false;
+        var post = posts?.FirstOrDefault(p => p.Id == id);
+        if (post is null) return;
+
+        selectedPost = summaries?.FirstOrDefault(s => s.Id == id);
+        selectedContent = "";
+
+        if (!string.IsNullOrEmpty(post.LatestVersionId))
+        {
+            var version = await BlogService.GetVersionByIdAsync(post.LatestVersionId);
+            if (version is not null)
+                selectedContent = version.Content;
+        }
+    }
+
+    private void ClosePost()
+    {
+        selectedPost = null;
+        selectedContent = "";
+    }
+
+    private void HandleEdit(string id)
+    {
+        Nav.NavigateTo($"/blogs/edit/{id}");
+    }
+
+    private async Task HandlePublish(string id)
+    {
+        var post = posts?.FirstOrDefault(p => p.Id == id);
+        if (post is null) return;
+        post.Published = true;
         await BlogService.UpdatePostAsync(post);
         await LoadPosts();
     }
 
-    private async Task PublishPost(BlogPost post)
+    private async Task HandleUnpublish(string id)
     {
-        post.Published = true;
+        var post = posts?.FirstOrDefault(p => p.Id == id);
+        if (post is null) return;
+        post.Published = false;
         await BlogService.UpdatePostAsync(post);
         await LoadPosts();
     }

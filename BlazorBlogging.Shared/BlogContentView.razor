@@ -1,0 +1,27 @@
+@using Markdig
+
+<div class="blog-content">
+    @((MarkupString)renderedHtml)
+</div>
+
+@code {
+    private string renderedHtml = "";
+    private string lastContent = "";
+
+    private static readonly MarkdownPipeline pipeline = new MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .Build();
+
+    [Parameter] public string Content { get; set; } = "";
+
+    protected override void OnParametersSet()
+    {
+        if (Content != lastContent)
+        {
+            lastContent = Content;
+            renderedHtml = string.IsNullOrEmpty(Content)
+                ? ""
+                : Markdown.ToHtml(Content, pipeline);
+        }
+    }
+}

@@ -1,0 +1,162 @@
+@using BlazorBlogging.Shared
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<div class="rich-editor">
+    <div class="editor-toolbar">
+        <div class="toolbar-group">
+            <button type="button" class="toolbar-btn" title="Bold"
+                @onclick='() => WrapSelection("**", "**")'><strong>B</strong></button>
+            <button type="button" class="toolbar-btn" title="Italic"
+                @onclick='() => WrapSelection("*", "*")'><em>I</em></button>
+            <button type="button" class="toolbar-btn" title="Strikethrough"
+                @onclick='() => WrapSelection("~~", "~~")'><s>S</s></button>
+        </div>
+
+        <span class="toolbar-sep"></span>
+
+        <div class="toolbar-group">
+            <button type="button" class="toolbar-btn" title="Heading 1"
+                @onclick='() => InsertLinePrefix("# ")'>H1</button>
+            <button type="button" class="toolbar-btn" title="Heading 2"
+                @onclick='() => InsertLinePrefix("## ")'>H2</button>
+            <button type="button" class="toolbar-btn" title="Heading 3"
+                @onclick='() => InsertLinePrefix("### ")'>H3</button>
+        </div>
+
+        <span class="toolbar-sep"></span>
+
+        <div class="toolbar-group">
+            <button type="button" class="toolbar-btn" title="Bullet List"
+                @onclick='() => InsertLinePrefix("- ")'>&#8226; List</button>
+            <button type="button" class="toolbar-btn" title="Numbered List"
+                @onclick='() => InsertLinePrefix("1. ")'>1. List</button>
+            <button type="button" class="toolbar-btn" title="Blockquote"
+                @onclick='() => InsertLinePrefix("> ")'>&#10077; Quote</button>
+        </div>
+
+        <span class="toolbar-sep"></span>
+
+        <div class="toolbar-group">
+            <button type="button" class="toolbar-btn" title="Inline Code"
+                @onclick='() => WrapSelection("`", "`")'>&lt;/&gt;</button>
+            <button type="button" class="toolbar-btn" title="Code Block"
+                @onclick="InsertCodeBlock">Code</button>
+            <button type="button" class="toolbar-btn toolbar-btn-terminal" title="Terminal / Shell Block"
+                @onclick="InsertTerminalBlock">&gt;_</button>
+        </div>
+
+        <span class="toolbar-sep"></span>
+
+        <div class="toolbar-group">
+            <button type="button" class="toolbar-btn" title="Link"
+                @onclick="InsertLink">Link</button>
+            <button type="button" class="toolbar-btn" title="Image"
+                @onclick="InsertImage">Img</button>
+            <button type="button" class="toolbar-btn" title="Horizontal Rule"
+                @onclick="InsertHorizontalRule">&mdash;</button>
+        </div>
+    </div>
+
+    <div class="editor-body">
+        <div class="editor-pane editor-input">
+            <div class="pane-label">Markdown</div>
+            <textarea id="@editorId"
+                      value="@Content"
+                      @oninput="OnInput"
+                      placeholder="Write your content in Markdown..."
+                      spellcheck="false"></textarea>
+        </div>
+        <div class="editor-pane editor-preview">
+            <div class="pane-label">Preview</div>
+            <div class="blog-content" id="@previewId">
+                @if (string.IsNullOrEmpty(Content))
+                {
+                    <p class="preview-placeholder">Preview will appear here...</p>
+                }
+                else
+                {
+                    <BlogContentView Content="@Content" />
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Content { get; set; } = "";
+    [Parameter] public EventCallback<string> ContentChanged { get; set; }
+
+    private string editorId = $"editor-{Guid.NewGuid():N}";
+    private string previewId = $"preview-{Guid.NewGuid():N}";
+    private bool hasRendered;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            hasRendered = true;
+            await JS.InvokeVoidAsync("editorInterop.initScrollSync", editorId, previewId);
+        }
+    }
+
+    private async Task OnInput(ChangeEventArgs e)
+    {
+        Content = e.Value?.ToString() ?? "";
+        await ContentChanged.InvokeAsync(Content);
+    }
+
+    private async Task WrapSelection(string before, string after)
+    {
+        await JS.InvokeVoidAsync("editorInterop.wrapSelection", editorId, before, after);
+    }
+
+    private async Task InsertLinePrefix(string prefix)
+    {
+        await JS.InvokeVoidAsync("editorInterop.insertLinePrefix", editorId, prefix);
+    }
+
+    private async Task InsertText(string text)
+    {
+        await JS.InvokeVoidAsync("editorInterop.insertText", editorId, text);
+    }
+
+    private async Task InsertCodeBlock()
+    {
+        var block = "```\n{{selection}}\n```\n";
+        await JS.InvokeVoidAsync("editorInterop.insertBlock", editorId, block, 4);
+    }
+
+    private async Task InsertTerminalBlock()
+    {
+        var block = "```terminal\n{{selection}}\n```\n";
+        await JS.InvokeVoidAsync("editorInterop.insertBlock", editorId, block, 12);
+    }
+
+    private async Task InsertLink()
+    {
+        await WrapSelection("[", "](url)");
+    }
+
+    private async Task InsertImage()
+    {
+        await WrapSelection("![", "](image-url)");
+    }
+
+    private async Task InsertHorizontalRule()
+    {
+        await InsertText("\n---\n");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hasRendered)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("editorInterop.disposeScrollSync", editorId);
+            }
+            catch (JSDisconnectedException) { }
+        }
+    }
+}

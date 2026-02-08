@@ -1,0 +1,163 @@
+/* ============================================================
+   Blog Content Styles (BlazorBlogging.Shared)
+   Used by the editor preview AND the public website to render
+   blog post content consistently.
+   Scope everything under .blog-content
+   ============================================================ */
+
+.blog-content {
+    line-height: 1.7;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+/* --- Typography --- */
+
+.blog-content h1 { font-size: 1.6rem;  margin: 1rem 0 0.5rem; color: #1e1e2f; }
+.blog-content h2 { font-size: 1.35rem; margin: 1rem 0 0.5rem; color: #1e1e2f; }
+.blog-content h3 { font-size: 1.15rem; margin: 1rem 0 0.5rem; color: #1e1e2f; }
+.blog-content h4 { font-size: 1.05rem; margin: 0.75rem 0 0.4rem; color: #1e1e2f; }
+
+.blog-content p {
+    margin: 0.5rem 0;
+}
+
+.blog-content strong {
+    font-weight: 600;
+}
+
+/* --- Inline code --- */
+
+.blog-content code {
+    background: #f0f0f0;
+    padding: 0.15rem 0.35rem;
+    border-radius: 3px;
+    font-family: "Cascadia Code", "Fira Code", "Source Code Pro", "Consolas", monospace;
+    font-size: 0.88em;
+}
+
+/* --- Code blocks (light, documentation-style) --- */
+
+.blog-content pre {
+    margin: 0.75rem 0;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+.blog-content pre code {
+    display: block;
+    padding: 1rem;
+    background: #f6f8fa;
+    color: #24292e;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    font-size: 0.88em;
+    line-height: 1.55;
+    overflow-x: auto;
+}
+
+/* --- Terminal block (dark, looks like a real terminal) --- */
+
+.blog-content pre:has(code.language-terminal) {
+    position: relative;
+    background: #0c0c0c;
+    border-radius: 8px;
+    border: 1px solid #333;
+    margin: 0.75rem 0;
+}
+
+.blog-content pre:has(code.language-terminal)::before {
+    content: "\25CF  \25CF  \25CF";
+    display: block;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: #888;
+    background: #1a1a1a;
+    border-bottom: 1px solid #333;
+    border-radius: 8px 8px 0 0;
+}
+
+.blog-content pre code.language-terminal {
+    background: #0c0c0c;
+    color: #4af626;
+    border: none;
+    border-radius: 0 0 8px 8px;
+    padding: 0.8rem 1rem;
+    font-size: 0.88em;
+    text-shadow: 0 0 3px rgba(74, 246, 38, 0.15);
+}
+
+/* --- Blockquote --- */
+
+.blog-content blockquote {
+    border-left: 4px solid #4a4aef;
+    margin: 0.75rem 0;
+    padding: 0.5rem 1rem;
+    background: #f8f8ff;
+    color: #555;
+}
+
+.blog-content blockquote p {
+    margin: 0.25rem 0;
+}
+
+/* --- Horizontal rule --- */
+
+.blog-content hr {
+    border: none;
+    border-top: 2px solid #e0e0e0;
+    margin: 1rem 0;
+}
+
+/* --- Lists --- */
+
+.blog-content ul, .blog-content ol {
+    padding-left: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+.blog-content li {
+    margin: 0.2rem 0;
+}
+
+/* --- Images --- */
+
+.blog-content img {
+    max-width: 100%;
+    border-radius: 4px;
+}
+
+/* --- Links --- */
+
+.blog-content a {
+    color: #4a4aef;
+    text-decoration: none;
+}
+
+.blog-content a:hover {
+    text-decoration: underline;
+}
+
+/* --- Tables --- */
+
+.blog-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+}
+
+.blog-content th, .blog-content td {
+    border: 1px solid #e0e0e0;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+}
+
+.blog-content th {
+    background: #f6f8fa;
+    font-weight: 600;
+}
+
+.blog-content tr:nth-child(even) {
+    background: #fafafa;
+}
