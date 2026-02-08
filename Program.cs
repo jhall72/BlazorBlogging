@@ -18,7 +18,7 @@ public class Program
 
         app.MainWindow
             .SetTitle("BlazorBlogging")
-            .SetUseOsDefaultSize(true)
+            .SetUseOsDefaultSize(false)
             .SetSize(1200, 800);
 
         AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
