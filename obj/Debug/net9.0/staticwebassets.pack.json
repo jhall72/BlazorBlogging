@@ -1,0 +1,33 @@
+{
+  "Files": [
+    {
+      "Id": "/home/johnhall72/Documents/Github/BlazorBlogging/wwwroot/css/app.css",
+      "PackagePath": "staticwebassets/css/app.css"
+    },
+    {
+      "Id": "/home/johnhall72/Documents/Github/BlazorBlogging/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.BlazorBlogging.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.BlazorBlogging.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.build.BlazorBlogging.props",
+      "PackagePath": "build\\BlazorBlogging.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.buildMultiTargeting.BlazorBlogging.props",
+      "PackagePath": "buildMultiTargeting\\BlazorBlogging.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.buildTransitive.BlazorBlogging.props",
+      "PackagePath": "buildTransitive\\BlazorBlogging.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

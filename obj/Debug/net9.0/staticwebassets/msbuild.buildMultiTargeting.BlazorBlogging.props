@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/BlazorBlogging.props" />
+</Project>
