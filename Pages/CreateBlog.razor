@@ -1,0 +1,173 @@
+@page "/blogs/create"
+@page "/blogs/edit/{Id}"
+@using BlazorBlogging.Data
+@using BlazorBlogging.Service
+@inject BlogService BlogService
+
+<h1>@(isEditing ? "Edit Blog Post" : "Create Blog Post")</h1>
+
+<div class="form-group">
+    <label>Title</label>
+    <input type="text" @bind="post.Title" />
+</div>
+
+<div class="form-group">
+    <label>Description</label>
+    <input type="text" @bind="post.Description" />
+</div>
+
+<div class="form-group">
+    <label>Content</label>
+    <textarea rows="12" @bind="post.Content"></textarea>
+</div>
+
+<div class="form-group">
+    <label>Tags (comma separated)</label>
+    <input type="text" @bind="tagsInput" />
+</div>
+
+<div class="form-group">
+    <label>
+        <input type="checkbox" @bind="post.Published" />
+        Published
+    </label>
+</div>
+
+<div class="form-actions">
+    <button class="btn" @onclick="SavePost">@(isEditing ? "Update" : "Create")</button>
+    <a class="btn btn-secondary" href="/blogs">Cancel</a>
+</div>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p class="form-message">@message</p>
+}
+
+@if (isEditing)
+{
+    <hr />
+    <h2>Versions</h2>
+
+    <div class="version-create">
+        <div class="form-group">
+            <label>Change Description</label>
+            <input type="text" @bind="newVersionDescription" />
+        </div>
+        <button class="btn" @onclick="CreateVersion">Save New Version</button>
+    </div>
+
+    @if (versions is not null && versions.Any())
+    {
+        <div class="version-list">
+            @foreach (var version in versions)
+            {
+                <div class="version-card @(version.Id == post.LatestVersionId ? "version-latest" : "")">
+                    <div class="version-header">
+                        <strong>Version @version.VersionNumber</strong>
+                        @if (version.Id == post.LatestVersionId)
+                        {
+                            <span class="badge published">Latest</span>
+                        }
+                        <span class="version-date">@version.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(version.ChangeDescription))
+                    {
+                        <p>@version.ChangeDescription</p>
+                    }
+                    <div class="version-actions">
+                        <button class="btn btn-secondary" @onclick="() => RestoreVersion(version)">Restore</button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No versions yet.</p>
+    }
+}
+
+@code {
+    [Parameter] public string? Id { get; set; }
+
+    private BlogPost post = new();
+    private string tagsInput = "";
+    private string message = "";
+    private bool isEditing;
+    private List<PostVersion>? versions;
+    private string newVersionDescription = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Id))
+        {
+            var existing = await BlogService.GetPostByIdAsync(Id);
+            if (existing is not null)
+            {
+                post = existing;
+                tagsInput = string.Join(", ", post.Tags);
+                isEditing = true;
+                await LoadVersions();
+            }
+        }
+    }
+
+    private async Task SavePost()
+    {
+        post.Tags = tagsInput
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+
+        if (isEditing)
+        {
+            await BlogService.UpdatePostAsync(post);
+            message = "Post updated.";
+        }
+        else
+        {
+            await BlogService.CreatePostAsync(post);
+            isEditing = true;
+            Id = post.Id;
+            message = "Post created.";
+        }
+    }
+
+    private async Task LoadVersions()
+    {
+        if (!string.IsNullOrEmpty(post.Id))
+        {
+            versions = await BlogService.GetVersionsByPostIdAsync(post.Id);
+        }
+    }
+
+    private async Task CreateVersion()
+    {
+        if (string.IsNullOrEmpty(post.Id)) return;
+
+        double nextVersion = 1.0;
+        if (versions is not null && versions.Any())
+        {
+            nextVersion = versions.Max(v => v.VersionNumber) + 1.0;
+        }
+
+        var version = new PostVersion
+        {
+            BlogPostId = post.Id,
+            Content = post.Content,
+            VersionNumber = nextVersion,
+            ChangeDescription = newVersionDescription
+        };
+
+        await BlogService.CreateVersionAsync(version);
+        newVersionDescription = "";
+        message = $"Version {nextVersion} saved.";
+        await LoadVersions();
+    }
+
+    private async Task RestoreVersion(PostVersion version)
+    {
+        post.Content = version.Content;
+        await BlogService.UpdatePostAsync(post);
+        message = $"Restored to version {version.VersionNumber}.";
+    }
+}

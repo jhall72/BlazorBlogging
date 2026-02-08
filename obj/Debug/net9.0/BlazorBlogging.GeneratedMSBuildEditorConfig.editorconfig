@@ -26,12 +26,12 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/johnhall72/Documents/Github/BlazorBlogging/Pages/Counter.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ291bnRlci5yYXpvcg==
+[/home/johnhall72/Documents/Github/BlazorBlogging/Pages/CreateBlog.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ3JlYXRlQmxvZy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/home/johnhall72/Documents/Github/BlazorBlogging/Pages/Index.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXMvSW5kZXgucmF6b3I=
+[/home/johnhall72/Documents/Github/BlazorBlogging/Pages/ViewBlogs.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVmlld0Jsb2dzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [/home/johnhall72/Documents/Github/BlazorBlogging/Shared/MainLayout.razor]
