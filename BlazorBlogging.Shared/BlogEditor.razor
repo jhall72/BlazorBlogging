@@ -1,0 +1,221 @@
+@using BlazorBlogging.Shared.Data
+
+<div class="blog-editor">
+    <div class="edit-page">
+        <div class="sticky-top-bar">
+            <h1>@(IsEditing ? "Edit Post" : "Create Post")</h1>
+            <div class="bar-actions">
+                @if (!string.IsNullOrEmpty(Message))
+                {
+                    <span class="bar-message">@Message</span>
+                }
+                <label class="toggle-label">
+                    <input type="checkbox" @bind="Post.Published" />
+                    Published
+                </label>
+                <button class="btn" @onclick="OnSave">@(IsEditing ? "Update" : "Create")</button>
+                <a class="btn btn-secondary" href="@CancelHref">Cancel</a>
+            </div>
+        </div>
+
+        <div class="edit-page-body">
+            <div class="edit-meta">
+                <div class="edit-meta-field edit-meta-title">
+                    <label>Title</label>
+                    <input type="text" @bind="Post.Title" placeholder="Post title..." />
+                </div>
+                <div class="edit-meta-field edit-meta-desc">
+                    <label>Description</label>
+                    <div class="input-with-btn">
+                        <input type="text" @bind="Post.Description" placeholder="Brief description..." />
+                        <button type="button" class="btn btn-suggest btn-sm" @onclick="OnSuggestDescription" disabled="@SuggestingDescription">
+                            @(SuggestingDescription ? "..." : "Suggest")
+                        </button>
+                    </div>
+                </div>
+                <div class="edit-meta-field edit-meta-tags">
+                    <label>Tags</label>
+                    <div class="input-with-btn">
+                        <input type="text" @bind="TagsInput" @bind:after="OnTagsInputChanged" placeholder="Comma separated..." />
+                        <button type="button" class="btn btn-suggest btn-sm" @onclick="OnSuggestTags" disabled="@SuggestingTags">
+                            @(SuggestingTags ? "..." : "Suggest")
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="edit-thumbnail-strip">
+                <div class="thumbnail-preview-slot">
+                    @if (!string.IsNullOrEmpty(thumbnailPreviewSrc))
+                    {
+                        <img src="@thumbnailPreviewSrc" alt="Thumbnail" />
+                    }
+                    else
+                    {
+                        <span class="thumbnail-placeholder">No image</span>
+                    }
+                </div>
+                <div class="thumbnail-fields">
+                    <div class="edit-meta-field">
+                        <label>Thumbnail URL</label>
+                        <input type="text" @bind="Post.ThumbnailUrl" @bind:after="UpdateThumbnailPreview" placeholder="https://..." />
+                    </div>
+                    <div class="thumbnail-actions">
+                        <label class="btn btn-sm btn-outline thumbnail-file-btn">
+                            Choose File
+                            <InputFile OnChange="OnThumbnailFileSelected" accept="image/*" style="display:none" />
+                        </label>
+                        @if (!string.IsNullOrEmpty(Post.ThumbnailBase64) || !string.IsNullOrEmpty(Post.ThumbnailUrl))
+                        {
+                            <button type="button" class="btn btn-sm btn-danger" @onclick="ClearThumbnail">Clear</button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="edit-content">
+                <RichEditor Content="@Content" ContentChanged="OnContentChanged" />
+            </div>
+
+            @if (Versions is not null)
+            {
+                <div class="edit-versions-bar">
+                    <button type="button" class="version-toggle-btn" @onclick="ToggleVersionPanel">
+                        <span class="toggle-chevron @(versionPanelOpen ? "open" : "")">&#9654;</span>
+                        Version History
+                        <span>(@Versions.Count)</span>
+                    </button>
+                </div>
+
+                @if (versionPanelOpen)
+                {
+                    <div class="version-section">
+                        <div class="version-create">
+                            <div class="version-create-row">
+                                <input type="text" @bind="newVersionDescription" placeholder="Change description..." />
+                                <button class="btn btn-sm" @onclick="HandleCreateVersion">Save Version</button>
+                            </div>
+                        </div>
+
+                        @if (Versions.Any())
+                        {
+                            <div class="version-list">
+                                @foreach (var version in Versions)
+                                {
+                                    <div class="version-card @(version.Id == LatestVersionId ? "version-latest" : "")">
+                                        <div class="version-header">
+                                            <strong>v@version.VersionNumber</strong>
+                                            @if (version.Id == LatestVersionId)
+                                            {
+                                                <span class="badge published">Latest</span>
+                                            }
+                                            <span class="version-date">@version.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                            @if (!string.IsNullOrEmpty(version.ChangeDescription))
+                                            {
+                                                <span class="version-desc">&mdash; @version.ChangeDescription</span>
+                                            }
+                                        </div>
+                                        <div class="version-actions">
+                                            <button class="btn btn-sm btn-outline" @onclick="() => OnRestoreVersion.InvokeAsync(version)">Restore</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="version-empty">No versions yet.</p>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public BlogPost Post { get; set; } = new();
+    [Parameter] public string Content { get; set; } = "";
+    [Parameter] public EventCallback<string> ContentChanged { get; set; }
+    [Parameter] public string TagsInput { get; set; } = "";
+    [Parameter] public EventCallback<string> TagsInputChanged { get; set; }
+    [Parameter] public bool IsEditing { get; set; }
+    [Parameter] public string? Message { get; set; }
+    [Parameter] public string CancelHref { get; set; } = "/";
+
+    [Parameter] public List<PostVersion>? Versions { get; set; }
+    [Parameter] public string? LatestVersionId { get; set; }
+
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public EventCallback<string> OnCreateVersion { get; set; }
+    [Parameter] public EventCallback<PostVersion> OnRestoreVersion { get; set; }
+    [Parameter] public EventCallback OnSuggestDescription { get; set; }
+    [Parameter] public EventCallback OnSuggestTags { get; set; }
+    [Parameter] public bool SuggestingDescription { get; set; }
+    [Parameter] public bool SuggestingTags { get; set; }
+
+    private bool versionPanelOpen;
+    private string newVersionDescription = "";
+    private string thumbnailPreviewSrc = "";
+
+    protected override void OnParametersSet()
+    {
+        UpdateThumbnailPreview();
+    }
+
+    private void ToggleVersionPanel()
+    {
+        versionPanelOpen = !versionPanelOpen;
+    }
+
+    private async Task HandleCreateVersion()
+    {
+        await OnCreateVersion.InvokeAsync(newVersionDescription);
+        newVersionDescription = "";
+    }
+
+    private async Task OnContentChanged(string value)
+    {
+        Content = value;
+        await ContentChanged.InvokeAsync(value);
+    }
+
+    private async Task OnTagsInputChanged()
+    {
+        await TagsInputChanged.InvokeAsync(TagsInput);
+    }
+
+    private void UpdateThumbnailPreview()
+    {
+        if (!string.IsNullOrEmpty(Post.ThumbnailBase64))
+            thumbnailPreviewSrc = Post.ThumbnailBase64;
+        else if (!string.IsNullOrEmpty(Post.ThumbnailUrl))
+            thumbnailPreviewSrc = Post.ThumbnailUrl;
+        else
+            thumbnailPreviewSrc = "";
+    }
+
+    private async Task OnThumbnailFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file is null) return;
+
+        const long maxSize = 5 * 1024 * 1024; // 5 MB
+        if (file.Size > maxSize) return;
+
+        using var stream = file.OpenReadStream(maxSize);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        var bytes = ms.ToArray();
+        Post.ThumbnailBase64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(bytes)}";
+        Post.ThumbnailUrl = null;
+        UpdateThumbnailPreview();
+    }
+
+    private void ClearThumbnail()
+    {
+        Post.ThumbnailUrl = null;
+        Post.ThumbnailBase64 = null;
+        UpdateThumbnailPreview();
+    }
+}

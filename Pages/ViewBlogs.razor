@@ -1,109 +1,11 @@
 @page "/blogs"
 @page "/"
-@using BlazorBlogging.Data
-@using BlazorBlogging.Service
-@using BlazorBlogging.Shared
-@using BlazorBlogging.Shared.Models
-@inject BlogService BlogService
-@inject NavigationManager Nav
 
-@if (selectedPost is not null)
-{
-    <BlogPostDetail Post="@selectedPost"
-                    Content="@selectedContent"
-                    OnBack="ClosePost" />
-}
-else
-{
-    <div class="page-header">
-        <div>
-            <h1>Blog Posts</h1>
-            @if (posts is not null)
-            {
-                var publishedCount = posts.Count(p => p.Published);
-                var draftCount = posts.Count - publishedCount;
-                <p class="page-header-summary">@posts.Count post@(posts.Count != 1 ? "s" : ""), @publishedCount published, @draftCount draft@(draftCount != 1 ? "s" : "")</p>
-            }
-        </div>
-        <a class="btn" href="/blogs/create">+ New Post</a>
+<div class="page-header">
+    <div>
+        <h1>Blog Posts</h1>
     </div>
+    <a class="btn" href="/blogs/create">+ New Post</a>
+</div>
 
-    <BlogListView Posts="@summaries"
-                  EditorMode="false"
-                  OnEdit="HandleEdit"
-                  OnPublish="HandlePublish"
-                  OnUnpublish="HandleUnpublish"
-                  OnView="HandleView" />
-}
-
-@code {
-    private List<BlogPost>? posts;
-    private List<BlogPostSummary>? summaries;
-    private BlogPostSummary? selectedPost;
-    private string selectedContent = "";
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadPosts();
-    }
-
-    private async Task LoadPosts()
-    {
-        posts = await BlogService.GetAllPostsAsync();
-        summaries = posts?.Select(p => new BlogPostSummary
-        {
-            Id = p.Id,
-            Title = p.Title,
-            Description = p.Description,
-            CreatedAt = p.CreatedAt,
-            UpdatedAt = p.UpdatedAt,
-            Published = p.Published,
-            Tags = p.Tags
-        }).ToList();
-    }
-
-    private async Task HandleView(string id)
-    {
-        var post = posts?.FirstOrDefault(p => p.Id == id);
-        if (post is null) return;
-
-        selectedPost = summaries?.FirstOrDefault(s => s.Id == id);
-        selectedContent = "";
-
-        if (!string.IsNullOrEmpty(post.LatestVersionId))
-        {
-            var version = await BlogService.GetVersionByIdAsync(post.LatestVersionId);
-            if (version is not null)
-                selectedContent = version.Content;
-        }
-    }
-
-    private void ClosePost()
-    {
-        selectedPost = null;
-        selectedContent = "";
-    }
-
-    private void HandleEdit(string id)
-    {
-        Nav.NavigateTo($"/blogs/edit/{id}");
-    }
-
-    private async Task HandlePublish(string id)
-    {
-        var post = posts?.FirstOrDefault(p => p.Id == id);
-        if (post is null) return;
-        post.Published = true;
-        await BlogService.UpdatePostAsync(post);
-        await LoadPosts();
-    }
-
-    private async Task HandleUnpublish(string id)
-    {
-        var post = posts?.FirstOrDefault(p => p.Id == id);
-        if (post is null) return;
-        post.Published = false;
-        await BlogService.UpdatePostAsync(post);
-        await LoadPosts();
-    }
-}
+<BlogListView EditorMode="false" />

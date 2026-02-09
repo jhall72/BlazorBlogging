@@ -1,9 +1,6 @@
-using BlazorBlogging.Data;
-using BlazorBlogging.Service;
-using Microsoft.EntityFrameworkCore;
+using BlazorBlogging.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
 using Photino.Blazor;
 
 namespace BlazorBlogging;
@@ -21,18 +18,7 @@ public class Program
             .Build();
 
         builder.Services.AddLogging();
-
-        var connectionString = configuration["MongoDB:ConnectionString"];
-        var databaseName = configuration["MongoDB:DatabaseName"];
-
-        var mongoClient = new MongoClient(connectionString);
-        builder.Services.AddDbContext<BlogDbContext>(options =>
-            options.UseMongoDB(mongoClient, databaseName!));
-
-        builder.Services.AddScoped<BlogService>();
-
-        var anthropicKey = configuration["Anthropic:ApiKey"] ?? "";
-        builder.Services.AddSingleton(new AiSuggestionService(anthropicKey));
+        builder.Services.AddBlazorBlogging(configuration);
 
         builder.RootComponents.Add<App>("app");
 

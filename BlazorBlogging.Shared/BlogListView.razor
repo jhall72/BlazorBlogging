@@ -1,10 +1,20 @@
+@using BlazorBlogging.Shared.Data
 @using BlazorBlogging.Shared.Models
+@using BlazorBlogging.Shared.Service
+@inject BlogService BlogService
+@inject NavigationManager Nav
 
-@if (Posts is null)
+@if (selectedPost is not null)
+{
+    <BlogPostDetail Post="@selectedPost"
+                    Content="@selectedContent"
+                    OnBack="ClosePost" />
+}
+else if (posts is null)
 {
     <p class="blog-list-loading">Loading...</p>
 }
-else if (!Posts.Any())
+else if (!posts.Any())
 {
     <div class="blog-list-empty">
         <p>@(EditorMode ? "No blog posts yet." : "No posts to show.")</p>
@@ -13,7 +23,7 @@ else if (!Posts.Any())
 else
 {
     <div class="blog-grid">
-        @foreach (var post in Posts)
+        @foreach (var post in posts)
         {
             @if (EditorMode)
             {
@@ -57,14 +67,14 @@ else
                             <span></span>
                         }
                         <div class="card-actions">
-                            <button class="btn btn-sm" @onclick="() => OnEdit.InvokeAsync(post.Id)">Edit</button>
+                            <button class="btn btn-sm" @onclick='() => Nav.NavigateTo($"/blogs/edit/{post.Id}")'>Edit</button>
                             @if (post.Published)
                             {
-                                <button class="btn btn-sm btn-secondary" @onclick="() => OnUnpublish.InvokeAsync(post.Id)">Unpublish</button>
+                                <button class="btn btn-sm btn-secondary" @onclick="() => TogglePublish(post.Id, false)">Unpublish</button>
                             }
                             else
                             {
-                                <button class="btn btn-sm btn-outline" @onclick="() => OnPublish.InvokeAsync(post.Id)">Publish</button>
+                                <button class="btn btn-sm btn-outline" @onclick="() => TogglePublish(post.Id, true)">Publish</button>
                             }
                         </div>
                     </div>
@@ -72,7 +82,7 @@ else
             }
             else
             {
-                <div class="blog-card blog-card-view" @onclick="() => HandleCardClick(post)">
+                <div class="blog-card blog-card-view" @onclick="() => OpenPost(post)">
                     <span class="card-date">@post.CreatedAt.ToString("MMM dd, yyyy")</span>
                     <h2 class="card-title">@post.Title</h2>
                     @if (!string.IsNullOrEmpty(post.Description))
@@ -87,19 +97,63 @@ else
 }
 
 @code {
-    [Parameter] public List<BlogPostSummary>? Posts { get; set; }
     [Parameter] public bool EditorMode { get; set; }
 
-    [Parameter] public EventCallback<string> OnEdit { get; set; }
-    [Parameter] public EventCallback<string> OnPublish { get; set; }
-    [Parameter] public EventCallback<string> OnUnpublish { get; set; }
-    [Parameter] public EventCallback<string> OnView { get; set; }
+    private List<BlogPostSummary>? posts;
+    private BlogPostSummary? selectedPost;
+    private string selectedContent = "";
 
-    private async Task HandleCardClick(BlogPostSummary post)
+    protected override async Task OnInitializedAsync()
     {
-        if (!EditorMode && OnView.HasDelegate)
+        await LoadPosts();
+    }
+
+    private async Task LoadPosts()
+    {
+        List<BlogPost> source;
+        if (EditorMode)
+            source = await BlogService.GetAllPostsAsync();
+        else
+            source = await BlogService.GetPublishedPostsAsync();
+
+        posts = source.Select(p => new BlogPostSummary
         {
-            await OnView.InvokeAsync(post.Id);
+            Id = p.Id,
+            Title = p.Title,
+            Description = p.Description,
+            CreatedAt = p.CreatedAt,
+            UpdatedAt = p.UpdatedAt,
+            Published = p.Published,
+            Tags = p.Tags
+        }).ToList();
+    }
+
+    private async Task TogglePublish(string id, bool publish)
+    {
+        var post = await BlogService.GetPostByIdAsync(id);
+        if (post is null) return;
+        post.Published = publish;
+        await BlogService.UpdatePostAsync(post);
+        await LoadPosts();
+    }
+
+    private async Task OpenPost(BlogPostSummary post)
+    {
+        selectedPost = post;
+        selectedContent = "";
+
+        var full = await BlogService.GetPostByIdAsync(post.Id);
+        if (full is not null && !string.IsNullOrEmpty(full.LatestVersionId))
+        {
+            var version = await BlogService.GetVersionByIdAsync(full.LatestVersionId);
+            if (version is not null)
+                selectedContent = version.Content;
         }
+    }
+
+    private void ClosePost()
+    {
+        selectedPost = null;
+        selectedContent = "";
     }
 }
