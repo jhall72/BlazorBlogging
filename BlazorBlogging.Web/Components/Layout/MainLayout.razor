@@ -1,0 +1,39 @@
+@inherits Microsoft.AspNetCore.Components.LayoutComponentBase
+
+<MudThemeProvider Theme="@_theme" IsDarkMode="true" />
+<MudPopoverProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="2" Color="Color.Dark">
+        <MudLink Href="/" Color="Color.Inherit" Underline="Underline.None" Typo="Typo.h6">
+            BlazorBlogging
+        </MudLink>
+    </MudAppBar>
+    <MudMainContent Style="padding-top: 64px;">
+        @Body
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private MudTheme _theme = new()
+    {
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#23668b",
+            Secondary = "#A5EEFF",
+            Success = "#64C2A6",
+            Info = "#0dcaf0",
+            Surface = "#2D323799",
+            Dark = "#2d3237",
+            Black = "#212529",
+            Background = "#212529",
+            TextPrimary = "#FFFFFF",
+            TextSecondary = "#A5EEFF",
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "6px",
+        },
+    };
+}

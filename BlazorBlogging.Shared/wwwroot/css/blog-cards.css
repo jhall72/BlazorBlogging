@@ -1,0 +1,150 @@
+/* ── Blog Card Styles ── */
+
+.blog-card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.blog-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.12),
+        0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Thumbnail area ── */
+
+.blog-card .card-thumbnail {
+    position: relative;
+    overflow: hidden;
+}
+
+.blog-card .card-thumbnail img {
+    transition: transform 0.4s ease;
+}
+
+.blog-card:hover .card-thumbnail img {
+    transform: scale(1.05);
+}
+
+.blog-card .card-thumbnail .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent 40%,
+        rgba(0, 0, 0, 0.5)
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.blog-card:hover .card-thumbnail .card-overlay {
+    opacity: 1;
+}
+
+/* ── Tags in overlay ── */
+
+.blog-card .card-tags {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.blog-card:hover .card-tags {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Read more arrow ── */
+
+.blog-card .read-more-arrow {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.blog-card:hover .read-more-arrow {
+    transform: translateX(4px);
+}
+
+/* ── Editor card status badge ── */
+
+.blog-card .card-status {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+}
+
+/* ── Editor action bar ── */
+
+.blog-card .card-actions {
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.blog-card:hover .card-actions {
+    opacity: 1;
+}
+
+/* ── Search bar ── */
+
+.blog-search-wrapper {
+    max-width: 420px;
+}
+
+.blog-search-field {
+    transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 280px;
+}
+
+.blog-search-field.focused {
+    max-width: 420px;
+}
+
+/* ── Search empty state ── */
+
+.search-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+    opacity: 0;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+/* ── Card entrance animation ── */
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.blog-card-grid .blog-card-item {
+    opacity: 0;
+}
+
+.blog-card-grid.animating .blog-card-item {
+    animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

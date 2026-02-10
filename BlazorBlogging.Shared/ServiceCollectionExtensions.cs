@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
+using MudBlazor.Services;
 
 namespace BlazorBlogging.Shared;
 
@@ -20,6 +21,7 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<BlogService>();
         services.AddSingleton(new AiSuggestionService(options.Anthropic.ApiKey));
+        services.AddMudServices();
 
         return services;
     }

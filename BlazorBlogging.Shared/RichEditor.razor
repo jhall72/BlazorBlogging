@@ -1,65 +1,58 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<div class="rich-editor">
-    <div class="editor-toolbar">
-        <div class="toolbar-group">
-            <button type="button" class="toolbar-btn" title="Bold"
-                @onclick='() => WrapSelection("**", "**")'><strong>B</strong></button>
-            <button type="button" class="toolbar-btn" title="Italic"
-                @onclick='() => WrapSelection("*", "*")'><em>I</em></button>
-            <button type="button" class="toolbar-btn" title="Strikethrough"
-                @onclick='() => WrapSelection("~~", "~~")'><s>S</s></button>
-        </div>
+<MudPaper Elevation="1" Class="rich-editor">
+    <MudToolBar Dense="true" Class="editor-toolbar">
+        <MudIconButton Icon="@Icons.Material.Filled.FormatBold" Size="Size.Small" Title="Bold"
+                       OnClick='() => WrapSelection("**", "**")' />
+        <MudIconButton Icon="@Icons.Material.Filled.FormatItalic" Size="Size.Small" Title="Italic"
+                       OnClick='() => WrapSelection("*", "*")' />
+        <MudIconButton Icon="@Icons.Material.Filled.FormatStrikethrough" Size="Size.Small" Title="Strikethrough"
+                       OnClick='() => WrapSelection("~~", "~~")' />
 
-        <span class="toolbar-sep"></span>
+        <MudDivider Vertical="true" FlexItem="true" Class="mx-1" />
 
-        <div class="toolbar-group">
-            <button type="button" class="toolbar-btn" title="Heading 1"
-                @onclick='() => InsertLinePrefix("# ")'>H1</button>
-            <button type="button" class="toolbar-btn" title="Heading 2"
-                @onclick='() => InsertLinePrefix("## ")'>H2</button>
-            <button type="button" class="toolbar-btn" title="Heading 3"
-                @onclick='() => InsertLinePrefix("### ")'>H3</button>
-        </div>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Heading 1"
+                   OnClick='() => InsertLinePrefix("# ")'>H1</MudButton>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Heading 2"
+                   OnClick='() => InsertLinePrefix("## ")'>H2</MudButton>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Heading 3"
+                   OnClick='() => InsertLinePrefix("### ")'>H3</MudButton>
 
-        <span class="toolbar-sep"></span>
+        <MudDivider Vertical="true" FlexItem="true" Class="mx-1" />
 
-        <div class="toolbar-group">
-            <button type="button" class="toolbar-btn" title="Bullet List"
-                @onclick='() => InsertLinePrefix("- ")'>&#8226; List</button>
-            <button type="button" class="toolbar-btn" title="Numbered List"
-                @onclick='() => InsertLinePrefix("1. ")'>1. List</button>
-            <button type="button" class="toolbar-btn" title="Blockquote"
-                @onclick='() => InsertLinePrefix("> ")'>&#10077; Quote</button>
-        </div>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Bullet List"
+                   OnClick='() => InsertLinePrefix("- ")'>&#8226; List</MudButton>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Numbered List"
+                   OnClick='() => InsertLinePrefix("1. ")'>1. List</MudButton>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Blockquote"
+                   OnClick='() => InsertLinePrefix("> ")'>&#10077; Quote</MudButton>
 
-        <span class="toolbar-sep"></span>
+        <MudDivider Vertical="true" FlexItem="true" Class="mx-1" />
 
-        <div class="toolbar-group">
-            <button type="button" class="toolbar-btn" title="Inline Code"
-                @onclick='() => WrapSelection("`", "`")'>&lt;/&gt;</button>
-            <button type="button" class="toolbar-btn" title="Code Block"
-                @onclick="InsertCodeBlock">Code</button>
-            <button type="button" class="toolbar-btn toolbar-btn-terminal" title="Terminal / Shell Block"
-                @onclick="InsertTerminalBlock">&gt;_</button>
-        </div>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Inline Code"
+                   OnClick='() => WrapSelection("`", "`")'>&lt;/&gt;</MudButton>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Code Block"
+                   OnClick="InsertCodeBlock">Code</MudButton>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Terminal / Shell Block"
+                   OnClick="InsertTerminalBlock"
+                   Style="background: var(--mud-palette-dark); color: var(--mud-palette-success); font-family: 'Cascadia Code', 'Fira Code', monospace; font-weight: 600;">
+            &gt;_
+        </MudButton>
 
-        <span class="toolbar-sep"></span>
+        <MudDivider Vertical="true" FlexItem="true" Class="mx-1" />
 
-        <div class="toolbar-group">
-            <button type="button" class="toolbar-btn" title="Link"
-                @onclick="InsertLink">Link</button>
-            <button type="button" class="toolbar-btn" title="Image"
-                @onclick="InsertImage">Img</button>
-            <button type="button" class="toolbar-btn" title="Horizontal Rule"
-                @onclick="InsertHorizontalRule">&mdash;</button>
-        </div>
-    </div>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Link"
+                   OnClick="InsertLink">Link</MudButton>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Image"
+                   OnClick="InsertImage">Img</MudButton>
+        <MudButton Variant="Variant.Text" Size="Size.Small" Title="Horizontal Rule"
+                   OnClick="InsertHorizontalRule">&mdash;</MudButton>
+    </MudToolBar>
 
     <div class="editor-body">
         <div class="editor-pane editor-input">
-            <div class="pane-label">Markdown</div>
+            <MudText Typo="Typo.overline" Class="pane-label">Markdown</MudText>
             <textarea id="@editorId"
                       value="@Content"
                       @oninput="OnInput"
@@ -67,7 +60,7 @@
                       spellcheck="false"></textarea>
         </div>
         <div class="editor-pane editor-preview">
-            <div class="pane-label">Preview</div>
+            <MudText Typo="Typo.overline" Class="pane-label">Preview</MudText>
             <div class="blog-content" id="@previewId">
                 @if (string.IsNullOrEmpty(Content))
                 {
@@ -80,7 +73,7 @@
             </div>
         </div>
     </div>
-</div>
+</MudPaper>
 
 @code {
     [Parameter] public string Content { get; set; } = "";

@@ -8,15 +8,15 @@
 .blog-content {
     line-height: 1.7;
     font-size: 0.95rem;
-    color: #333;
+    color: var(--mud-palette-text-primary);
 }
 
 /* --- Typography --- */
 
-.blog-content h1 { font-size: 1.6rem;  margin: 1rem 0 0.5rem; color: #1e1e2f; }
-.blog-content h2 { font-size: 1.35rem; margin: 1rem 0 0.5rem; color: #1e1e2f; }
-.blog-content h3 { font-size: 1.15rem; margin: 1rem 0 0.5rem; color: #1e1e2f; }
-.blog-content h4 { font-size: 1.05rem; margin: 0.75rem 0 0.4rem; color: #1e1e2f; }
+.blog-content h1 { font-size: 1.6rem;  margin: 1rem 0 0.5rem; color: var(--mud-palette-text-primary); }
+.blog-content h2 { font-size: 1.35rem; margin: 1rem 0 0.5rem; color: var(--mud-palette-text-primary); }
+.blog-content h3 { font-size: 1.15rem; margin: 1rem 0 0.5rem; color: var(--mud-palette-text-primary); }
+.blog-content h4 { font-size: 1.05rem; margin: 0.75rem 0 0.4rem; color: var(--mud-palette-text-primary); }
 
 .blog-content p {
     margin: 0.5rem 0;
@@ -29,7 +29,7 @@
 /* --- Inline code --- */
 
 .blog-content code {
-    background: #f0f0f0;
+    background: var(--mud-palette-background);
     padding: 0.15rem 0.35rem;
     border-radius: 3px;
     font-family: "Cascadia Code", "Fira Code", "Source Code Pro", "Consolas", monospace;
@@ -47,9 +47,9 @@
 .blog-content pre code {
     display: block;
     padding: 1rem;
-    background: #f6f8fa;
-    color: #24292e;
-    border: 1px solid #e1e4e8;
+    background: var(--mud-palette-background);
+    color: var(--mud-palette-text-primary);
+    border: 1px solid var(--mud-palette-lines-default);
     border-radius: 6px;
     font-size: 0.88em;
     line-height: 1.55;
@@ -91,11 +91,11 @@
 /* --- Blockquote --- */
 
 .blog-content blockquote {
-    border-left: 4px solid #4a4aef;
+    border-left: 4px solid var(--mud-palette-primary);
     margin: 0.75rem 0;
     padding: 0.5rem 1rem;
-    background: #f8f8ff;
-    color: #555;
+    background: var(--mud-palette-background);
+    color: var(--mud-palette-text-secondary);
 }
 
 .blog-content blockquote p {
@@ -106,7 +106,7 @@
 
 .blog-content hr {
     border: none;
-    border-top: 2px solid #e0e0e0;
+    border-top: 2px solid var(--mud-palette-lines-default);
     margin: 1rem 0;
 }
 
@@ -131,7 +131,7 @@
 /* --- Links --- */
 
 .blog-content a {
-    color: #4a4aef;
+    color: var(--mud-palette-primary);
     text-decoration: none;
 }
 
@@ -148,16 +148,16 @@
 }
 
 .blog-content th, .blog-content td {
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--mud-palette-lines-default);
     padding: 0.5rem 0.75rem;
     text-align: left;
 }
 
 .blog-content th {
-    background: #f6f8fa;
+    background: var(--mud-palette-background);
     font-weight: 600;
 }
 
 .blog-content tr:nth-child(even) {
-    background: #fafafa;
+    background: var(--mud-palette-background);
 }

@@ -1,0 +1,11 @@
+@page "/blogs"
+@page "/"
+
+<div class="d-flex align-center justify-space-between mb-4">
+    <MudText Typo="Typo.h4">Blog Posts</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/blogs/create" StartIcon="@Icons.Material.Filled.Add">
+        New Post
+    </MudButton>
+</div>
+
+<BlogListView EditorMode="false" />

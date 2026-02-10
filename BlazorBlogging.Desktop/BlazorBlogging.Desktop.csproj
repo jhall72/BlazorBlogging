@@ -5,7 +5,6 @@
     <OutputType>WinExe</OutputType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <DefaultItemExcludes>$(DefaultItemExcludes);BlazorBlogging.Shared\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="BlazorBlogging.Shared\BlazorBlogging.Shared.csproj" />
+    <ProjectReference Include="..\BlazorBlogging.Shared\BlazorBlogging.Shared.csproj" />
   </ItemGroup>
 
 </Project>

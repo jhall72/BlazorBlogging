@@ -1,34 +1,36 @@
 @using BlazorBlogging.Shared.Models
 
-<div class="post-detail">
-    <div class="post-detail-bar">
-        <button class="post-back-btn" @onclick="OnBack">
-            &larr; Back to posts
-        </button>
-        <span class="post-bar-title">@Post.Title</span>
-    </div>
-    <div class="post-detail-scroll">
-        <div class="post-detail-inner">
-            <div class="post-detail-header">
-                <div class="post-detail-meta">
-                    <span>@Post.CreatedAt.ToString("MMMM dd, yyyy")</span>
+<div>
+    <div style="position: sticky; top: 64px; z-index: 1; background: var(--mud-palette-background);">
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="px-0 pt-3 pb-3">
+            <div class="d-flex align-center gap-3 mb-3">
+                <MudChip T="string" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Tertiary"
+                         Variant="Variant.Outlined" OnClick="OnBack" Style="cursor: pointer;">
+                    Back to posts
+                </MudChip>
+                <div class="d-flex align-center gap-2">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        @Post.CreatedAt.ToString("MMMM dd, yyyy")
+                    </MudText>
                     @if (Post.Tags.Any())
                     {
-                        <span class="post-meta-sep">&middot;</span>
-                        <span>@ReadTime min read</span>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">&middot;</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            @ReadTime min read
+                        </MudText>
                     }
                 </div>
-                <h1 class="post-detail-title">@Post.Title</h1>
-                @if (!string.IsNullOrEmpty(Post.Description))
-                {
-                    <p class="post-detail-desc">@Post.Description</p>
-                }
             </div>
-            <div class="post-detail-body">
-                <BlogContentView Content="@Content" />
-            </div>
-        </div>
+            <MudText Typo="Typo.h3" Style="font-weight: 700; line-height: 1.25; letter-spacing: -0.01em;">
+                @Post.Title
+            </MudText>
+            <MudDivider Class="mt-3" />
+        </MudContainer>
     </div>
+
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="px-0 py-4">
+        <BlogContentView Content="@Content" />
+    </MudContainer>
 </div>
 
 @code {

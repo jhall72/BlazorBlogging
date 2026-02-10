@@ -9,5 +9,12 @@ namespace BlazorBlogging.Shared.Models
         public DateTime? UpdatedAt { get; set; }
         public bool Published { get; set; }
         public List<string> Tags { get; set; } = new();
+        public string? ThumbnailUrl { get; set; }
+        public string? ThumbnailBase64 { get; set; }
+
+        public string? ThumbnailSrc =>
+            !string.IsNullOrEmpty(ThumbnailBase64) ? ThumbnailBase64 :
+            !string.IsNullOrEmpty(ThumbnailUrl) ? ThumbnailUrl :
+            null;
     }
 }

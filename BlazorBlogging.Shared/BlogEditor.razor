@@ -2,76 +2,87 @@
 
 <div class="blog-editor">
     <div class="edit-page">
-        <div class="sticky-top-bar">
-            <h1>@(IsEditing ? "Edit Post" : "Create Post")</h1>
-            <div class="bar-actions">
-                @if (!string.IsNullOrEmpty(Message))
-                {
-                    <span class="bar-message">@Message</span>
-                }
-                <label class="toggle-label">
-                    <input type="checkbox" @bind="Post.Published" />
-                    Published
-                </label>
-                <button class="btn" @onclick="OnSave">@(IsEditing ? "Update" : "Create")</button>
-                <a class="btn btn-secondary" href="@CancelHref">Cancel</a>
-            </div>
-        </div>
+        <MudAppBar Dense="true" Fixed="false" Color="Color.Primary" Elevation="1">
+            <MudText Typo="Typo.h6">@(IsEditing ? "Edit Post" : "Create Post")</MudText>
+            <MudSpacer />
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <MudAlert Severity="Severity.Success" Dense="true" NoIcon="true" Class="mr-2"
+                          Style="padding: 2px 12px;">
+                    @Message
+                </MudAlert>
+            }
+            <MudSwitch T="bool" @bind-Value="Post.Published" Color="Color.Inherit" Label="Published" Class="mr-2" />
+            <MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="OnSave"
+                       Style="background: var(--mud-palette-surface); color: var(--mud-palette-primary);">
+                @(IsEditing ? "Update" : "Create")
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Inherit" Size="Size.Small" Href="@CancelHref" Class="ml-2">
+                Cancel
+            </MudButton>
+        </MudAppBar>
 
         <div class="edit-page-body">
-            <div class="edit-meta">
-                <div class="edit-meta-field edit-meta-title">
-                    <label>Title</label>
-                    <input type="text" @bind="Post.Title" placeholder="Post title..." />
-                </div>
-                <div class="edit-meta-field edit-meta-desc">
-                    <label>Description</label>
-                    <div class="input-with-btn">
-                        <input type="text" @bind="Post.Description" placeholder="Brief description..." />
-                        <button type="button" class="btn btn-suggest btn-sm" @onclick="OnSuggestDescription" disabled="@SuggestingDescription">
-                            @(SuggestingDescription ? "..." : "Suggest")
-                        </button>
-                    </div>
-                </div>
-                <div class="edit-meta-field edit-meta-tags">
-                    <label>Tags</label>
-                    <div class="input-with-btn">
-                        <input type="text" @bind="TagsInput" @bind:after="OnTagsInputChanged" placeholder="Comma separated..." />
-                        <button type="button" class="btn btn-suggest btn-sm" @onclick="OnSuggestTags" disabled="@SuggestingTags">
-                            @(SuggestingTags ? "..." : "Suggest")
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <MudPaper Elevation="0" Class="pa-3" Style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+                <MudGrid Spacing="2">
+                    <MudItem xs="3">
+                        <MudTextField T="string" @bind-Value="Post.Title" Label="Title" Variant="Variant.Outlined"
+                                      Margin="Margin.Dense" Placeholder="Post title..." />
+                    </MudItem>
+                    <MudItem xs="5">
+                        <MudTextField T="string" @bind-Value="Post.Description" Label="Description" Variant="Variant.Outlined"
+                                      Margin="Margin.Dense" Placeholder="Brief description..."
+                                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.AutoAwesome"
+                                      AdornmentColor="Color.Secondary" OnAdornmentClick="OnSuggestDescription"
+                                      Disabled="SuggestingDescription" />
+                    </MudItem>
+                    <MudItem xs="4">
+                        <MudTextField T="string" @bind-Value="TagsInput" @bind-Value:after="OnTagsInputChanged"
+                                      Label="Tags" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                      Placeholder="Comma separated..."
+                                      Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.AutoAwesome"
+                                      AdornmentColor="Color.Secondary" OnAdornmentClick="OnSuggestTags"
+                                      Disabled="SuggestingTags" />
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
 
-            <div class="edit-thumbnail-strip">
-                <div class="thumbnail-preview-slot">
-                    @if (!string.IsNullOrEmpty(thumbnailPreviewSrc))
-                    {
-                        <img src="@thumbnailPreviewSrc" alt="Thumbnail" />
-                    }
-                    else
-                    {
-                        <span class="thumbnail-placeholder">No image</span>
-                    }
-                </div>
-                <div class="thumbnail-fields">
-                    <div class="edit-meta-field">
-                        <label>Thumbnail URL</label>
-                        <input type="text" @bind="Post.ThumbnailUrl" @bind:after="UpdateThumbnailPreview" placeholder="https://..." />
-                    </div>
-                    <div class="thumbnail-actions">
-                        <label class="btn btn-sm btn-outline thumbnail-file-btn">
-                            Choose File
-                            <InputFile OnChange="OnThumbnailFileSelected" accept="image/*" style="display:none" />
-                        </label>
-                        @if (!string.IsNullOrEmpty(Post.ThumbnailBase64) || !string.IsNullOrEmpty(Post.ThumbnailUrl))
+            <MudPaper Elevation="0" Class="pa-3" Style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+                <div class="d-flex align-center gap-3">
+                    <MudAvatar Size="Size.Large" Variant="Variant.Outlined" Style="width: 64px; height: 64px; border-radius: 6px;">
+                        @if (!string.IsNullOrEmpty(thumbnailPreviewSrc))
                         {
-                            <button type="button" class="btn btn-sm btn-danger" @onclick="ClearThumbnail">Clear</button>
+                            <MudImage Src="@thumbnailPreviewSrc" Alt="Thumbnail" Style="width: 100%; height: 100%; object-fit: cover;" />
                         }
+                        else
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Image" />
+                        }
+                    </MudAvatar>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 0.35rem;">
+                        <MudTextField T="string" @bind-Value="Post.ThumbnailUrl" @bind-Value:after="UpdateThumbnailPreview"
+                                      Label="Thumbnail URL" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                      Placeholder="https://..." />
+                        <div class="d-flex gap-2 align-center">
+                            <MudFileUpload T="IBrowserFile" Accept="image/*" FilesChanged="OnThumbnailFileSelected">
+                                <ActivatorContent>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                               StartIcon="@Icons.Material.Filled.CloudUpload">
+                                        Choose File
+                                    </MudButton>
+                                </ActivatorContent>
+                            </MudFileUpload>
+                            @if (!string.IsNullOrEmpty(Post.ThumbnailBase64) || !string.IsNullOrEmpty(Post.ThumbnailUrl))
+                            {
+                                <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                                           OnClick="ClearThumbnail">
+                                    Clear
+                                </MudButton>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
+            </MudPaper>
 
             <div class="edit-content">
                 <RichEditor Content="@Content" ContentChanged="OnContentChanged" />
@@ -79,55 +90,64 @@
 
             @if (Versions is not null)
             {
-                <div class="edit-versions-bar">
-                    <button type="button" class="version-toggle-btn" @onclick="ToggleVersionPanel">
-                        <span class="toggle-chevron @(versionPanelOpen ? "open" : "")">&#9654;</span>
-                        Version History
-                        <span>(@Versions.Count)</span>
-                    </button>
-                </div>
-
-                @if (versionPanelOpen)
-                {
-                    <div class="version-section">
-                        <div class="version-create">
-                            <div class="version-create-row">
-                                <input type="text" @bind="newVersionDescription" placeholder="Change description..." />
-                                <button class="btn btn-sm" @onclick="HandleCreateVersion">Save Version</button>
+                <MudExpansionPanels Class="mt-0" Style="border-top: 1px solid var(--mud-palette-lines-default);">
+                    <MudExpansionPanel @bind-Expanded="versionPanelOpen"
+                                       Icon="@Icons.Material.Filled.KeyboardArrowUp">
+                        <TitleContent>
+                            <MudText Typo="Typo.body2">
+                                Version History (@Versions.Count)
+                            </MudText>
+                        </TitleContent>
+                        <ChildContent>
+                            <div class="d-flex gap-2 align-center mb-3">
+                                <MudTextField T="string" @bind-Value="newVersionDescription" Variant="Variant.Outlined"
+                                              Margin="Margin.Dense" Placeholder="Change description..." Style="flex: 1;" />
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                           OnClick="HandleCreateVersion">
+                                    Save Version
+                                </MudButton>
                             </div>
-                        </div>
 
-                        @if (Versions.Any())
-                        {
-                            <div class="version-list">
-                                @foreach (var version in Versions)
-                                {
-                                    <div class="version-card @(version.Id == LatestVersionId ? "version-latest" : "")">
-                                        <div class="version-header">
-                                            <strong>v@version.VersionNumber</strong>
-                                            @if (version.Id == LatestVersionId)
-                                            {
-                                                <span class="badge published">Latest</span>
-                                            }
-                                            <span class="version-date">@version.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
-                                            @if (!string.IsNullOrEmpty(version.ChangeDescription))
-                                            {
-                                                <span class="version-desc">&mdash; @version.ChangeDescription</span>
-                                            }
-                                        </div>
-                                        <div class="version-actions">
-                                            <button class="btn btn-sm btn-outline" @onclick="() => OnRestoreVersion.InvokeAsync(version)">Restore</button>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <p class="version-empty">No versions yet.</p>
-                        }
-                    </div>
-                }
+                            @if (Versions.Any())
+                            {
+                                <div class="d-flex flex-column gap-2">
+                                    @foreach (var version in Versions)
+                                    {
+                                        <MudPaper Outlined="true" Class="pa-2"
+                                                  Style="@(version.Id == LatestVersionId ? "border-color: var(--mud-palette-success); background: var(--mud-palette-success-lighten);" : "")">
+                                            <div class="d-flex align-center justify-space-between">
+                                                <div class="d-flex align-center gap-2">
+                                                    <MudText Typo="Typo.body2"><strong>v@version.VersionNumber</strong></MudText>
+                                                    @if (version.Id == LatestVersionId)
+                                                    {
+                                                        <MudChip T="string" Color="Color.Success" Size="Size.Small">Latest</MudChip>
+                                                    }
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                        @version.CreatedAt.ToString("MMM dd, yyyy HH:mm")
+                                                    </MudText>
+                                                    @if (!string.IsNullOrEmpty(version.ChangeDescription))
+                                                    {
+                                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                            &mdash; @version.ChangeDescription
+                                                        </MudText>
+                                                    }
+                                                </div>
+                                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small"
+                                                           OnClick="() => OnRestoreVersion.InvokeAsync(version)">
+                                                    Restore
+                                                </MudButton>
+                                            </div>
+                                        </MudPaper>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">No versions yet.</MudText>
+                            }
+                        </ChildContent>
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
             }
         </div>
     </div>
@@ -163,11 +183,6 @@
         UpdateThumbnailPreview();
     }
 
-    private void ToggleVersionPanel()
-    {
-        versionPanelOpen = !versionPanelOpen;
-    }
-
     private async Task HandleCreateVersion()
     {
         await OnCreateVersion.InvokeAsync(newVersionDescription);
@@ -195,9 +210,8 @@
             thumbnailPreviewSrc = "";
     }
 
-    private async Task OnThumbnailFileSelected(InputFileChangeEventArgs e)
+    private async Task OnThumbnailFileSelected(IBrowserFile? file)
     {
-        var file = e.File;
         if (file is null) return;
 
         const long maxSize = 5 * 1024 * 1024; // 5 MB

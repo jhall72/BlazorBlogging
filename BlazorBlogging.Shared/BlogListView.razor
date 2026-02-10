@@ -12,96 +12,184 @@
 }
 else if (posts is null)
 {
-    <p class="blog-list-loading">Loading...</p>
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
 }
 else if (!posts.Any())
 {
-    <div class="blog-list-empty">
-        <p>@(EditorMode ? "No blog posts yet." : "No posts to show.")</p>
-    </div>
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="my-4">
+        @(EditorMode ? "No blog posts yet." : "No posts to show.")
+    </MudAlert>
 }
 else
 {
-    <div class="blog-grid">
-        @foreach (var post in posts)
+    <div class="blog-search-wrapper mb-4">
+        <MudTextField T="string" @bind-Value="searchText" @bind-Value:after="OnSearchChanged"
+                      Placeholder="Search posts..." Variant="Variant.Outlined" Margin="Margin.Dense"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                      AdornmentColor="Color.Secondary" Immediate="true"
+                      Class="@($"blog-search-field{(searchFocused ? " focused" : "")}")"
+                      @onfocusin="() => searchFocused = true"
+                      @onfocusout="() => searchFocused = false" />
+        @if (!string.IsNullOrWhiteSpace(searchText))
         {
-            @if (EditorMode)
-            {
-                <div class="blog-card">
-                    <div class="card-top">
-                        @if (post.Published)
-                        {
-                            <span class="badge badge-published">Published</span>
-                        }
-                        else
-                        {
-                            <span class="badge badge-draft">Draft</span>
-                        }
-                        <span class="card-date">@post.CreatedAt.ToString("MMM dd, yyyy")</span>
-                    </div>
-
-                    <h2 class="card-title">@post.Title</h2>
-
-                    @if (!string.IsNullOrEmpty(post.Description))
-                    {
-                        <p class="card-desc">@post.Description</p>
-                    }
-
-                    @if (post.Tags.Any())
-                    {
-                        <div class="card-tags">
-                            @foreach (var tag in post.Tags)
-                            {
-                                <span class="tag-pill">@tag</span>
-                            }
-                        </div>
-                    }
-
-                    <div class="card-bottom">
-                        @if (post.UpdatedAt.HasValue)
-                        {
-                            <span class="card-updated">Updated @post.UpdatedAt.Value.ToString("MMM dd")</span>
-                        }
-                        else
-                        {
-                            <span></span>
-                        }
-                        <div class="card-actions">
-                            <button class="btn btn-sm" @onclick='() => Nav.NavigateTo($"/blogs/edit/{post.Id}")'>Edit</button>
-                            @if (post.Published)
-                            {
-                                <button class="btn btn-sm btn-secondary" @onclick="() => TogglePublish(post.Id, false)">Unpublish</button>
-                            }
-                            else
-                            {
-                                <button class="btn btn-sm btn-outline" @onclick="() => TogglePublish(post.Id, true)">Publish</button>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="blog-card blog-card-view" @onclick="() => OpenPost(post)">
-                    <span class="card-date">@post.CreatedAt.ToString("MMM dd, yyyy")</span>
-                    <h2 class="card-title">@post.Title</h2>
-                    @if (!string.IsNullOrEmpty(post.Description))
-                    {
-                        <p class="card-desc">@post.Description</p>
-                    }
-                    <span class="card-read-more">Read more &rarr;</span>
-                </div>
-            }
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1 ml-1">
+                @filteredPosts.Count result@(filteredPosts.Count != 1 ? "s" : "")
+            </MudText>
         }
     </div>
+
+    @if (!filteredPosts.Any())
+    {
+        <div class="search-empty">
+            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Style="font-size: 3rem;" Color="Color.Secondary" />
+            <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mt-2">No posts match your search</MudText>
+            <MudButton Variant="Variant.Text" Color="Color.Primary" Class="mt-1" OnClick="ClearSearch">Clear search</MudButton>
+        </div>
+    }
+    else
+    {
+        <MudGrid Class="@($"blog-card-grid{(isAnimating ? " animating" : "")}")">
+            @{ var index = 0; }
+            @foreach (var post in filteredPosts)
+            {
+                var delay = index * 60;
+                <MudItem xs="12" sm="6" md="4" lg="3" Class="blog-card-item" Style="@($"animation-delay: {delay}ms;")">
+                    @if (EditorMode)
+                    {
+                        <MudCard Elevation="2" Class="blog-card" Style="display: flex; flex-direction: column; height: 100%; border: 2px solid var(--mud-palette-primary);">
+                            <div class="card-thumbnail" style="height: 200px; background: var(--mud-palette-background-gray);">
+                                @if (post.ThumbnailSrc is not null)
+                                {
+                                    <MudImage Src="@post.ThumbnailSrc" Alt="@post.Title"
+                                              Style="width: 100%; height: 100%; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="d-flex align-center justify-center" style="height: 100%; color: var(--mud-palette-text-disabled);">
+                                        <MudIcon Icon="@Icons.Material.Filled.Image" Style="font-size: 3rem;" />
+                                    </div>
+                                }
+                                <div class="card-overlay"></div>
+                                <div class="card-status">
+                                    @if (post.Published)
+                                    {
+                                        <MudChip T="string" Color="Color.Success" Size="Size.Small" Variant="Variant.Filled">Published</MudChip>
+                                    }
+                                    else
+                                    {
+                                        <MudChip T="string" Color="Color.Default" Size="Size.Small" Variant="Variant.Filled">Draft</MudChip>
+                                    }
+                                </div>
+                                @if (post.Tags.Any())
+                                {
+                                    <div class="card-tags">
+                                        @foreach (var tag in post.Tags.Take(3))
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Dark"
+                                                     Style="font-size: 0.7rem; height: 22px;">@tag</MudChip>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <MudCardContent Style="flex: 1; display: flex; flex-direction: column; padding: 16px;">
+                                <MudText Typo="Typo.h6" Style="font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
+                                    @post.Title
+                                </MudText>
+                                @if (!string.IsNullOrEmpty(post.Description))
+                                {
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2"
+                                             Style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; line-height: 1.5;">
+                                        @post.Description
+                                    </MudText>
+                                }
+                                <div class="d-flex align-center justify-space-between mt-auto" style="padding-top: 12px; border-top: 1px solid var(--mud-palette-lines-default); margin-top: 12px;">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @post.CreatedAt.ToString("MMM dd, yyyy")
+                                    </MudText>
+                                    <div class="d-flex gap-1 card-actions">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary"
+                                                       OnClick='() => Nav.NavigateTo($"/blogs/edit/{post.Id}")' />
+                                        @if (post.Published)
+                                        {
+                                            <MudIconButton Icon="@Icons.Material.Filled.Unpublished" Size="Size.Small" Color="Color.Secondary"
+                                                           OnClick="() => TogglePublish(post.Id, false)" />
+                                        }
+                                        else
+                                        {
+                                            <MudIconButton Icon="@Icons.Material.Filled.Publish" Size="Size.Small" Color="Color.Primary"
+                                                           OnClick="() => TogglePublish(post.Id, true)" />
+                                        }
+                                    </div>
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                    else
+                    {
+                        <MudCard Elevation="2" Class="blog-card" Style="display: flex; flex-direction: column; height: 100%; cursor: pointer; border: 2px solid var(--mud-palette-primary);"
+                                 @onclick="() => OpenPost(post)">
+                            <div class="card-thumbnail" style="height: 200px; background: var(--mud-palette-background-gray);">
+                                @if (post.ThumbnailSrc is not null)
+                                {
+                                    <MudImage Src="@post.ThumbnailSrc" Alt="@post.Title"
+                                              Style="width: 100%; height: 100%; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="d-flex align-center justify-center" style="height: 100%; color: var(--mud-palette-text-disabled);">
+                                        <MudIcon Icon="@Icons.Material.Filled.Article" Style="font-size: 3rem;" />
+                                    </div>
+                                }
+                                <div class="card-overlay"></div>
+                                @if (post.Tags.Any())
+                                {
+                                    <div class="card-tags">
+                                        @foreach (var tag in post.Tags.Take(3))
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Dark"
+                                                     Style="font-size: 0.7rem; height: 22px;">@tag</MudChip>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <MudCardContent Style="flex: 1; display: flex; flex-direction: column; padding: 16px;">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @post.CreatedAt.ToString("MMM dd, yyyy")
+                                </MudText>
+                                <MudText Typo="Typo.h6" Class="mt-1" Style="font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3;">
+                                    @post.Title
+                                </MudText>
+                                @if (!string.IsNullOrEmpty(post.Description))
+                                {
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2"
+                                             Style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; line-height: 1.5;">
+                                        @post.Description
+                                    </MudText>
+                                }
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary" Class="mt-auto" Style="font-weight: 600; padding-top: 12px;">
+                                    Read more <span class="read-more-arrow">&rarr;</span>
+                                </MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                </MudItem>
+                index++;
+            }
+        </MudGrid>
+    }
 }
 
 @code {
     [Parameter] public bool EditorMode { get; set; }
 
     private List<BlogPostSummary>? posts;
+    private List<BlogPostSummary> filteredPosts = new();
     private BlogPostSummary? selectedPost;
     private string selectedContent = "";
+    private string searchText = "";
+    private bool searchFocused;
+    private bool isAnimating;
+    private System.Timers.Timer? debounceTimer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -124,8 +212,64 @@ else
             CreatedAt = p.CreatedAt,
             UpdatedAt = p.UpdatedAt,
             Published = p.Published,
-            Tags = p.Tags
+            Tags = p.Tags,
+            ThumbnailUrl = p.ThumbnailUrl,
+            ThumbnailBase64 = p.ThumbnailBase64
         }).ToList();
+
+        ApplyFilter();
+        await TriggerAnimation();
+    }
+
+    private void OnSearchChanged()
+    {
+        debounceTimer?.Stop();
+        debounceTimer?.Dispose();
+        debounceTimer = new System.Timers.Timer(200);
+        debounceTimer.AutoReset = false;
+        debounceTimer.Elapsed += async (_, _) =>
+        {
+            await InvokeAsync(async () =>
+            {
+                ApplyFilter();
+                await TriggerAnimation();
+                StateHasChanged();
+            });
+        };
+        debounceTimer.Start();
+    }
+
+    private void ApplyFilter()
+    {
+        if (posts is null) return;
+
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            filteredPosts = posts.ToList();
+            return;
+        }
+
+        var term = searchText.Trim();
+        filteredPosts = posts.Where(p =>
+            p.Title.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+            p.Description.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+            p.Tags.Any(t => t.Contains(term, StringComparison.OrdinalIgnoreCase))
+        ).ToList();
+    }
+
+    private async Task TriggerAnimation()
+    {
+        isAnimating = false;
+        StateHasChanged();
+        await Task.Delay(20);
+        isAnimating = true;
+    }
+
+    private void ClearSearch()
+    {
+        searchText = "";
+        ApplyFilter();
+        _ = TriggerAnimation();
     }
 
     private async Task TogglePublish(string id, bool publish)

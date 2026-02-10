@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Photino.Blazor;
 
-namespace BlazorBlogging;
+namespace BlazorBlogging.Desktop;
 
 public class Program
 {
