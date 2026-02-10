@@ -48,16 +48,16 @@ else
     }
     else
     {
-        <MudGrid Class="@($"blog-card-grid{(isAnimating ? " animating" : "")}")">
+        <div class="@($"blog-card-grid{(isAnimating ? " animating" : "")}")">
             @{ var index = 0; }
             @foreach (var post in filteredPosts)
             {
                 var delay = index * 60;
-                <MudItem xs="12" sm="6" md="4" lg="3" Class="blog-card-item" Style="@($"animation-delay: {delay}ms;")">
+                <div class="blog-card-item" style="@($"animation-delay: {delay}ms;")">
                     @if (EditorMode)
                     {
                         <MudCard Elevation="2" Class="blog-card" Style="display: flex; flex-direction: column; height: 100%; border: 2px solid var(--mud-palette-primary);">
-                            <div class="card-thumbnail" style="height: 200px; background: var(--mud-palette-background-gray);">
+                            <div class="card-thumbnail" style="background: var(--mud-palette-background-gray);">
                                 @if (post.ThumbnailSrc is not null)
                                 {
                                     <MudImage Src="@post.ThumbnailSrc" Alt="@post.Title"
@@ -128,7 +128,7 @@ else
                     {
                         <MudCard Elevation="2" Class="blog-card" Style="display: flex; flex-direction: column; height: 100%; cursor: pointer; border: 2px solid var(--mud-palette-primary);"
                                  @onclick="() => OpenPost(post)">
-                            <div class="card-thumbnail" style="height: 200px; background: var(--mud-palette-background-gray);">
+                            <div class="card-thumbnail" style="background: var(--mud-palette-background-gray);">
                                 @if (post.ThumbnailSrc is not null)
                                 {
                                     <MudImage Src="@post.ThumbnailSrc" Alt="@post.Title"
@@ -172,10 +172,10 @@ else
                             </MudCardContent>
                         </MudCard>
                     }
-                </MudItem>
+                </div>
                 index++;
             }
-        </MudGrid>
+        </div>
     }
 }
 

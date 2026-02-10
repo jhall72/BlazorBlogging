@@ -1,4 +1,43 @@
 /* ============================================================
+   Blog Post Detail Layout
+   ============================================================ */
+
+.blog-detail {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 155px);
+    max-height: calc(100vh - 155px);
+    overflow: hidden;
+}
+
+.blog-detail-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 48px;
+    border-bottom: 1px solid var(--mud-palette-lines-default);
+}
+
+.blog-detail-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 48px 40vh;
+    max-width: 100%;
+    min-height: 0;
+}
+
+@media (max-width: 768px) {
+    .blog-detail-bar {
+        padding: 8px 16px;
+    }
+
+    .blog-detail-content {
+        padding: 24px 16px;
+    }
+}
+
+/* ============================================================
    Blog Content Styles (BlazorBlogging.Shared)
    Used by the editor preview AND the public website to render
    blog post content consistently.

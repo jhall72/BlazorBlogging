@@ -1,36 +1,32 @@
 @using BlazorBlogging.Shared.Models
 
-<div>
-    <div style="position: sticky; top: 64px; z-index: 1; background: var(--mud-palette-background);">
-        <MudContainer MaxWidth="MaxWidth.Medium" Class="px-0 pt-3 pb-3">
-            <div class="d-flex align-center gap-3 mb-3">
-                <MudChip T="string" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Tertiary"
-                         Variant="Variant.Outlined" OnClick="OnBack" Style="cursor: pointer;">
-                    Back to posts
-                </MudChip>
-                <div class="d-flex align-center gap-2">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">
-                        @Post.CreatedAt.ToString("MMMM dd, yyyy")
-                    </MudText>
-                    @if (Post.Tags.Any())
-                    {
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">&middot;</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">
-                            @ReadTime min read
-                        </MudText>
-                    }
-                </div>
-            </div>
-            <MudText Typo="Typo.h3" Style="font-weight: 700; line-height: 1.25; letter-spacing: -0.01em;">
+<div class="blog-detail">
+    <div class="blog-detail-bar">
+        <div style="flex: 1;">
+            <MudChip T="string" Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Tertiary"
+                     Variant="Variant.Outlined" Size="Size.Small" OnClick="OnBack" Style="cursor: pointer;">
+                Back to posts
+            </MudChip>
+        </div>
+        <div class="d-flex align-center gap-2">
+            <MudText Typo="Typo.caption" Style="font-weight: 600;">
                 @Post.Title
             </MudText>
-            <MudDivider Class="mt-3" />
-        </MudContainer>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">&middot;</MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                @Post.CreatedAt.ToString("MMMM dd, yyyy")
+            </MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">&middot;</MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                @ReadTime min read
+            </MudText>
+        </div>
+        <div style="flex: 1;"></div>
     </div>
 
-    <MudContainer MaxWidth="MaxWidth.Medium" Class="px-0 py-4">
+    <div class="blog-detail-content">
         <BlogContentView Content="@Content" />
-    </MudContainer>
+    </div>
 </div>
 
 @code {
